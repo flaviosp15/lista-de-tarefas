@@ -1,151 +1,161 @@
-let addButton = document.getElementById('button-add-todo');//BOTÃO 'ADICIONAR'
-let checkboxSelectAll = document.getElementById('select-all-boxes');//CHECKBOX 'MARCAR E DESMARCAR TODAS AS TAREFAS'
-let btnDeleteAll = document.getElementById('button-delete-1');//BOTÃO 'EXCLUIR TODAS AS TAREFAS SELECIONADAS'
-let deleteButton = document.getElementById('button-delete-all-todo');//BOTÃO 'SIM' (dentro do modal)
+let btnAddTarefa = document.getElementById('button-add-todo'); //BOTÃO 'ADICIONAR'
+let checkTodasTarefas = document.getElementById('select-all-boxes'); //CHECKBOX 'MARCAR E DESMARCAR TODAS AS TAREFAS'
+let gatilhoDeletar = document.getElementById('button-delete-1'); //BOTÃO 'EXCLUIR TODAS AS TAREFAS SELECIONADAS'
+let simDeletarTarefas = document.getElementById('button-delete-all-todo'); //BOTÃO 'SIM' (dentro do modal)
+let checkboxes = document.querySelectorAll('.box'); //CHECKBOXES DAS TAREFAS
+let cardBody = document.querySelector('.card-body'); //CORPO DA APLICAÇÃO
+let inputTarefa = document.querySelector('.form-control'); //INPUT DE TAREFAS
+let listaDesordenada = document.getElementById('lista'); //LISTA
+let tarefas = JSON.parse(localStorage.getItem('tarefas')) || [];
 
-/*====================================================== 
-BOTÃO 'ADICIONAR' - ADICIONA OS ELEMENTOS NA LISTA
-======================================================== */
-addButton.onclick = () => {
-    //============================== INPUT DE TEXTO ==============================
-    let inputEl = document.querySelector('.form-control');
-    let inputValue = document.querySelector('.form-control').value;
-    let text = "";
-    //============================== OBJETOS DE LISTA ==============================
-    let unorderList = document.querySelector('.list-group');
-    let toDoElemList = document.createElement('li');
-        toDoElemList.setAttribute('class', 'list-group-item align-items-center d-flex');
-    //let allElList = document.querySelectorAll('.list-group-item');
-    //============================== CHECKBOX DAS TAREFAS ==============================
-    let checkBox = document.createElement('input');
-        checkBox.setAttribute('class', 'box me-3');
-        checkBox.setAttribute('type', 'checkbox');
-    //============================== TEXTO DA TAREFA ==============================
-    let span = document.createElement('span');
-        span.setAttribute('class', 'flex-grow-1');
-    //============================== ICONE DA LIXEIRA ==============================
-    let trash = document.createElement('i');
-        trash.setAttribute('class', 'bx bx-trash');
-        trash.style.cursor = 'pointer';
-    //============================== ALERTA ==============================
-    let alert = document.querySelector('.alert');
+//========================================== FUNÇÕES =========================================
 
-    //Se houver valores digitados no campo 'Input', é construído um elemento com vários componentes, na lista.
-    if(inputValue !== "") {
-        text = document.createTextNode(inputValue);
-        unorderList.appendChild(toDoElemList);
-        toDoElemList.appendChild(checkBox);
-        toDoElemList.appendChild(span);
-        span.appendChild(text);
-        toDoElemList.appendChild(trash);
-        trash.onclick = () => {
-            //A primeira condição verifica se o checkbox está ativo ou não.
-            if(trash.previousSibling.previousSibling.checked || trash.previousSibling.previousSibling.checked == false) {
-                unorderList.removeChild(toDoElemList);
-                inputEl.focus();
-                disabledCheck();
-                disabledBtnDelete();
-                //Essa condição verifica se há elementos filhos dentro da lista, caso não tenha, o botão de deletar todas as tarefas selecionadas fica desabilitado.
-                if(unorderList.hasChildNodes() == false) {
-                    btnDeleteAll.disabled = true;
-                }
-            }
-        }
-        //Há uma iteração em todos os checkboxes, quando clicados a função que desabilita o botão de deletar todas as tarefas é ativada.
-        for (let i = 0; i < unorderList.children.length; i++) {
-            let boxes = document.querySelectorAll('.box');
-            boxes[i].onclick = () => {
-                disabledBtnDelete();
-            }
+const renderizarTarefas = () => {
+    listaDesordenada.innerHTML = "";
+    for(let tarefa of tarefas) {
+        //============================== ELEMENTO DA LISTA ==============================
+        let itemLista = document.createElement('li');
+            itemLista.setAttribute('class', 'list-group-item align-items-center d-flex');
+        //============================== CHECKBOX DA TAREFA ==============================
+        let checkBox = document.createElement('input');
+            checkBox.setAttribute('class', 'box me-3');
+            checkBox.setAttribute('type', 'checkbox');
+        //============================== TEXTO DA TAREFA ==============================
+        let span = document.createElement('span');
+            span.setAttribute('class', 'flex-grow-1');
+        let textoItem = document.createTextNode(tarefa);
+        
+        listaDesordenada.appendChild(itemLista);
+        itemLista.appendChild(checkBox);
+        itemLista.appendChild(span);
+        span.appendChild(textoItem);
+    }
+    //Há uma iteração em todos os checkboxes, quando clicados a função, que desabilita o botão de deletar todas as tarefas, é ativada.
+    for(let i = 0; i < listaDesordenada.children.length; i++) {
+        let checkboxes = document.querySelectorAll('.box');
+        checkboxes[i].onclick = () => {
+            desabilitarBtnDel();
         }
     }
-    else {  //Caso não tenha nenhum valor no 'Input', a aplicação emitirá um alerta de 1.5s.
-        alert.classList.add('alert', 'alert-warning', 'p-2', 'mb-3');
-        alert.setAttribute('role', 'alert');
-        alert.textContent = "Digite uma tarefa no campo acima!";
-        setTimeout(() => {
-            alert.setAttribute('class', 'alert m-0 p-0');
-            alert.textContent = "";
-        }, 1500);
-    }
-    inputEl.value = ""; //Limpa o campo 'Input'.
-    inputEl.focus();    //Foca no campo 'Input'.
-    disabledCheck();
+    desabilitarCheckbox();
 }
 
-/*====================================================== 
-CHECKBOX - MARCA E DESMARCA TODOS
-======================================================== */
-checkboxSelectAll.onclick = () => {
-    let boxes = document.querySelectorAll('.box');
-    //Há uma iteração por todos checkboxes da lista.
-    for (let i = 0; i < boxes.length; i++) {
-        //verifica se há algum checkbox na lista diferente do checkbox de marcar e desmarcar todos. 
-        if(boxes.checked != checkboxSelectAll) {
-            boxes[i].checked = checkboxSelectAll.checked;
-        }
-    }
-    disabledBtnDelete();
+const renderizarAlerta = () => {
+    let alerta = document.createElement('div');
+    let msg = document.createTextNode("Digite uma tarefa no campo acima!")
+    alerta.setAttribute('class', 'alert alert-warning p-2 mb-3');
+    alerta.appendChild(msg);
+    cardBody.appendChild(alerta);
+    cardBody.insertBefore(alerta, listaDesordenada);
 }
 
-/*====================================================== 
-CHECKBOX - HABILITADO E DESABILITADO
-======================================================== */
-const disabledCheck = () => {
-    let unorderList = document.querySelector('.list-group');
+const removerAlertas = () => {
+    let divAlertas = document.querySelectorAll('.alert');
+    for (let i = 0; i < divAlertas.length; i++) {
+        cardBody.removeChild(divAlertas[i]);
+    }
+}
+
+const removerTarefa = (tarefa) => {
+    tarefas.splice(tarefas.indexOf(tarefa.parentElement.textContent), 1);
+    renderizarTarefas();
+    salvarDados();
+}
+
+const desabilitarCheckbox = () => {
     //A condição verifica se há elementos na lista, caso não tenha, o checkbox que marca e desmarca todas tarefas é desabilitado e desmarcado.
-    if(unorderList.hasChildNodes() === false) {
-        checkboxSelectAll.disabled = true;
-        checkboxSelectAll.checked = false;
+    if(tarefas.length == 0) {
+        checkTodasTarefas.disabled = true;
+        checkTodasTarefas.checked = false;
     }
     else {  //Se houver elementos na lista, o checkbox permanece ativo.
-        checkboxSelectAll.disabled = false;
+        checkTodasTarefas.disabled = false;
     }
 }
 
-/*====================================================== 
-DELETA TODOS ELEMENTOS SELECIONADOS ---> alocado dentro do Modal no botão 'Sim'
-======================================================== */
-deleteButton.onclick = () => {
-    let boxes = document.querySelectorAll('.box');
-    let btnDeleteAll = document.getElementById('button-delete-1');
-    let unorderList = document.querySelector('.list-group');
-
-    for (let i = 0; i < boxes.length; i++) {
-        //Caso o checkbox esteja selecionado, o elemento pai é removido, o botão deletar todas as tarefas é desabilitado e o checkbox marcar/desmarcar todos é desmarcado.
-        if(boxes[i].checked) {
-            boxes[i].parentElement.remove();
-            btnDeleteAll.disabled = true;
-            checkboxSelectAll.checked = false;
-            disabledCheck();
-            //Quando o último elemento da lista ficava desmarcado o botão de deletar todas as tarefas permanecia habilitado, para corrigir esse bug foi preciso criar uma condição específica para esse eleemento.
-            if(unorderList.lastElementChild.firstElementChild.checked == false) {
-                btnDeleteAll.disabled = true;
-                disabledCheck();
-            }
-        }
-    }
-}
-
-/*====================================================== 
-BOTÃO EXCLUIR SELECIONADOS - HABILITADO E DESABILITADO
-======================================================== */
-const disabledBtnDelete = () => {
-    let boxes = document.querySelectorAll('.box');
-    let unorderList = document.querySelector('.list-group');
-    let emptyArray = [];
-
-    for(let i = 0; i < unorderList.children.length; i++) {
+const desabilitarBtnDel = () => {
+    let checkboxes = document.querySelectorAll('.box');
+    let arrayVazio = [];
+    for(let i = 0; i < checkboxes.length; i++) {
         //Essa condição verifica se há checkbox selecionada, caso tenha, o elemento é inserido em um array.
-        if(boxes[i].checked) {
-            emptyArray.push(boxes[i]);
+        if(checkboxes[i].checked) {
+            arrayVazio.push(checkboxes[i]);
         }
         //A quantidade de elementos no array é verificada, caso a quantidade seja 0(zero), o botão excluir todas as tarefas selecionadas é desabilitado.
-        if(!emptyArray.length == true) {
-            btnDeleteAll.disabled = true;
+        if(!arrayVazio.length == true) {
+            gatilhoDeletar.disabled = true;
         }
         else {
-            btnDeleteAll.disabled = false;
+            if(checkboxes[checkboxes.length - 1].checked) {
+                gatilhoDeletar.disabled = false;
+            }
+            gatilhoDeletar.disabled = false;
+        }
+        msgModal(arrayVazio.length > 1);
+    }
+}
+
+const msgModal = (boolean) => { //Personaliza a pergunta de acordo com a quantidade de tarefas selecionadas.
+    let modalBody = document.querySelector('.modal-body');
+    if(boolean) {
+        modalBody.textContent = "Você realmente quer excluir as tarefas selecionadas?"
+    }
+    else {
+        modalBody.textContent = "Você realmente quer excluir a tarefa selecionada?"
+    }
+}
+
+const salvarDados = () => {
+    localStorage.setItem('tarefas', JSON.stringify(tarefas));
+}
+
+renderizarTarefas();
+
+//========================================== CLICKS =========================================
+
+btnAddTarefa.onclick = () => {
+    let novaTarefa = inputTarefa.value;
+    //Se houver valores digitados no campo 'Input', é renderizado um elemento na lista.
+    if(inputTarefa.value !== "") {
+        tarefas.push(novaTarefa);
+        salvarDados();
+        renderizarTarefas();
+        removerAlertas();
+        
+    }
+    else {  //Caso não tenha nenhum valor no 'Input', a aplicação emitirá um alerta.
+        removerAlertas();
+        renderizarAlerta();
+    }
+    inputTarefa.value = "";
+    inputTarefa.focus();
+    desabilitarCheckbox();
+}
+
+checkTodasTarefas.onclick = () => {
+    let checkboxes = document.querySelectorAll('.box');
+    //Há uma iteração por todos checkboxes da lista.
+    for (let i = 0; i < checkboxes.length; i++) {
+        //verifica se há algum checkbox na lista diferente do checkbox de marcar e desmarcar todos. 
+        if(checkboxes.checked != checkTodasTarefas) {
+            checkboxes[i].checked = checkTodasTarefas.checked;
+        }
+    }
+    desabilitarBtnDel();
+}
+
+simDeletarTarefas.onclick = () => {
+    let checkboxes = document.querySelectorAll('.box');
+    for (let i = 0; i < checkboxes.length; i++) {
+        //Caso o checkbox esteja selecionado, o elemento pai é removido, o botão deletar todas as tarefas é desabilitado e o checkbox marcar/desmarcar todos é desmarcado.
+        if(checkboxes[i].checked) {
+            removerTarefa(checkboxes[i]);
+            gatilhoDeletar.disabled = true;
+            checkTodasTarefas.checked = false;
+            removerAlertas()
+            desabilitarCheckbox();
+            inputTarefa.value = '';
+            inputTarefa.focus();
         }
     }
 }

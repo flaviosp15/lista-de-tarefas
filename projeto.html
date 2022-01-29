@@ -9,20 +9,19 @@
     <title>Lista de Tarefas</title>
 </head>
 <body>
-    <div class="container my-3">
+    <div class="container w-50 my-3">
         <div class="card">
             <h1 class="card-header">Lista de Tarefas</h1>
             <div class="card-body">
                 <div class="input-group mb-3">
                     <input type="text" class="form-control" placeholder="Digite a tarefa...">
-                    <button class="btn btn-secondary" type="button" id="button-add-todo">Adicionar</button>
+                    <button class="btn btn-primary" type="button" id="button-add-todo">Adicionar</button>
                 </div>
-                <div class="alert m-0 p-0"></div>
-                <ul class="list-group"></ul>
+                <ul class="list-group" id="lista"></ul>
             </div>
             <div class="card-footer d-flex flex-column">
-                <span><input id="select-all-boxes" class="select-all-boxes ms-3 me-2" disabled="true" type="checkbox">Marcar/ Desmarcar todas as tarefas</span>
-                <button id="button-delete-1" class="btn btn-danger mx-auto my-2" data-bs-toggle="modal" data-bs-target="#showModal" disabled="true"><i class="bx bx-trash me-2"></i>Excluir todas as tarefas selecionadas</button>
+                <span class="mx-auto"><input id="select-all-boxes" class="select-all-boxes ms-3 me-2" disabled="true" type="checkbox">Marcar/ Desmarcar todas as tarefas</span>
+                <button id="button-delete-1" class="btn btn-danger mx-auto my-2" data-bs-toggle="modal" data-bs-target="#showModal" disabled="true"><i class="bx bx-trash me-2"></i>Excluir tarefa(s) selecionada(s)</button>
             </div>
         </div>
     </div>
@@ -34,9 +33,7 @@
                 <h5 class="modal-title" id="showModal">Aviso!</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
-              <div class="modal-body">
-                Você realmente quer excluir as tarefas selecionadas?
-              </div>
+              <div class="modal-body"></div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Não</button>
                 <button type="button" class="btn btn-danger" id="button-delete-all-todo" data-bs-dismiss="modal">Sim</button>
