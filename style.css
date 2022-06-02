@@ -1,5 +1,18 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
 
 body {
-    font-family: 'Roboto', sans-serif;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  font-family: "Roboto", sans-serif;
+}
+.container {
+  min-width: max(315px, 90vw);
+  margin-top: 30px;
+}
+.card-body,
+.card-footer,
+button,
+input {
+  font-size: max(0.96rem, 1.5vw) !important;
 }
